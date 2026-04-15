@@ -32,5 +32,9 @@ server:
     bundle: web
   # Step 1b: End of SSL configuration
   # Step 5: Configure session cookie with SameSite attribute
-  # ...
+  servlet:
+    session:
+      cookie:
+        same-site: strict
+        secure: true
   # Step 5: End of session cookie configuration

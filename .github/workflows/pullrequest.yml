@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run OSV Scanner (after PR)
-        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
+        uses: google/osv-scanner-action/osv-scanner-action@c51854704019a247608d928f370c98740469d4b5
         with:
           scan-args: |-
             --format sarif
@@ -35,7 +35,7 @@ jobs:
           git checkout ${{ github.event.pull_request.base.sha }}
 
       - name: Run OSV Scanner (before PR)
-        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
+        uses: google/osv-scanner-action/osv-scanner-action@c51854704019a247608d928f370c98740469d4b5
         with:
           scan-args: |-
             --format sarif
@@ -44,7 +44,7 @@ jobs:
         continue-on-error: true
 
       - name: Compare OSV reports
-        uses: google/osv-scanner-action/osv-reporter-action@v1.9.1
+        uses: google/osv-scanner-action/osv-reporter-action@c51854704019a247608d928f370c98740469d4b5
         with:
           scan-args: |-
             --output OSVDiff.sarif
@@ -62,7 +62,7 @@ jobs:
     name: Source Code Analysis
     runs-on: ubuntu-latest
     container:
-      image: returntocorp/semgrep
+      image: returntocorp/semgrep@sha256:7810f1d7884974ab6dda7bef8f4a2c8e165ea2142fd8260515d380e4f1407263
     steps:
       - name: Checkout PR code
         uses: actions/checkout@v4

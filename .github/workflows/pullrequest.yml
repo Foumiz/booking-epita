@@ -1,0 +1,85 @@
+name: pullrequest
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  actions: read
+  security-events: write
+  contents: read
+
+jobs:
+
+  dependencies-analysis:
+    name: Dependencies Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run OSV Scanner (after PR)
+        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
+        with:
+          scan-args: |-
+            --format sarif
+            --output OSVAfter.sarif
+            ./
+        continue-on-error: true
+
+      - name: Checkout baseline commit
+        run: |
+          git checkout ${{ github.event.pull_request.base.sha }}
+
+      - name: Run OSV Scanner (before PR)
+        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
+        with:
+          scan-args: |-
+            --format sarif
+            --output OSVBefore.sarif
+            ./
+        continue-on-error: true
+
+      - name: Compare OSV reports
+        uses: google/osv-scanner-action/osv-reporter-action@v1.9.1
+        with:
+          scan-args: |-
+            --output OSVDiff.sarif
+            --new OSVAfter.sarif
+            --old OSVBefore.sarif
+        continue-on-error: true
+
+      - name: Save differential report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependencies-diff-report
+          path: OSVDiff.sarif
+
+  source-code-analysis:
+    name: Source Code Analysis
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Semgrep (differential)
+        run: |
+          semgrep scan \
+            --config .semgrep \
+            --sarif \
+            --output SemgrepDiff.sarif \
+            --baseline-commit ${{ github.event.pull_request.base.sha }}
+        continue-on-error: true
+
+      - name: Save differential report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sourcecode-diff-report
+          path: SemgrepDiff.sarif

@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run OSV Scanner (after PR)
-        uses: google/osv-scanner-action/osv-scanner-action@c51854704019a247608d928f370c98740469d4b5
+        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
         with:
           scan-args: |-
             --format sarif
@@ -35,7 +35,7 @@ jobs:
           git checkout ${{ github.event.pull_request.base.sha }}
 
       - name: Run OSV Scanner (before PR)
-        uses: google/osv-scanner-action/osv-scanner-action@c51854704019a247608d928f370c98740469d4b5
+        uses: google/osv-scanner-action/osv-scanner-action@v1.9.1
         with:
           scan-args: |-
             --format sarif
@@ -44,15 +44,16 @@ jobs:
         continue-on-error: true
 
       - name: Compare OSV reports
-        uses: google/osv-scanner-action/osv-reporter-action@c51854704019a247608d928f370c98740469d4b5
+        uses: google/osv-scanner-action/osv-reporter-action@v1.9.1
         with:
           scan-args: |-
             --output OSVDiff.sarif
             --new OSVAfter.sarif
             --old OSVBefore.sarif
-        continue-on-error: true
+            --fail-on-vuln: true
 
       - name: Save differential report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dependencies-diff-report
@@ -62,7 +63,7 @@ jobs:
     name: Source Code Analysis
     runs-on: ubuntu-latest
     container:
-      image: returntocorp/semgrep@sha256:7810f1d7884974ab6dda7bef8f4a2c8e165ea2142fd8260515d380e4f1407263
+      image: returntocorp/semgrep
     steps:
       - name: Checkout PR code
         uses: actions/checkout@v4
@@ -76,9 +77,9 @@ jobs:
             --sarif \
             --output SemgrepDiff.sarif \
             --baseline-commit ${{ github.event.pull_request.base.sha }}
-        continue-on-error: true
 
       - name: Save differential report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: sourcecode-diff-report

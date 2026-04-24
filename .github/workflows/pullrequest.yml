@@ -50,9 +50,9 @@ jobs:
             --output OSVDiff.sarif
             --new OSVAfter.sarif
             --old OSVBefore.sarif
-        continue-on-error: true
 
       - name: Save differential report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dependencies-diff-report
@@ -76,9 +76,9 @@ jobs:
             --sarif \
             --output SemgrepDiff.sarif \
             --baseline-commit ${{ github.event.pull_request.base.sha }}
-        continue-on-error: true
 
       - name: Save differential report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: sourcecode-diff-report

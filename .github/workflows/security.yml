@@ -35,7 +35,7 @@ jobs:
     name: Source Code Analysis
     runs-on: ubuntu-latest
     container:
-      image: returntocorp/semgrep@sha256:34b079df03bd8ed6860552adf3905cc5d146dc4d
+      image: returntocorp/semgrep@sha256:7810f1d7884974ab6dda7bef8f4a2c8e165ea2142fd8260515d380e4f1407263
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
